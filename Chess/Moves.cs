@@ -19,7 +19,10 @@ namespace Chess
                     .OrderBy(s => s.Row);
 
                 var limit = potentialScope.FirstOrDefault(s => s.OccupyingPiece != null);
-                return potentialScope.Where(s => s.Row <= limit.Row);
+                
+                return potentialScope.Where(s => 
+                    limit.OccupyingPiece.Color == position.OccupyingPiece.Color && s.Row < limit.Row ||
+                    limit.OccupyingPiece.Color != position.OccupyingPiece.Color && s.Row <= limit.Row);
             };
         }
 
@@ -35,7 +38,10 @@ namespace Chess
                     .OrderBy(s => s.Row);
 
                 var limit = potentialScope.LastOrDefault(s => s.OccupyingPiece != null);
-                return potentialScope.Where(s => s.Row >= limit.Row);
+                
+                return potentialScope.Where(s => 
+                    s.OccupyingPiece.Color == position.OccupyingPiece.Color && s.Row > limit.Row ||
+                    s.OccupyingPiece.Color != position.OccupyingPiece.Color && s.Row >= limit.Row);
             };
         }
 
@@ -51,7 +57,10 @@ namespace Chess
                             .OrderBy(s => s.Column);
 
                 var limit = potentialScope.FirstOrDefault(s => s.OccupyingPiece != null);
-                return potentialScope.Where(s => s.Column <= limit.Column);
+                
+                return potentialScope.Where(s => 
+                    s.OccupyingPiece.Color == position.OccupyingPiece.Color && s.Column < limit.Column ||
+                    s.OccupyingPiece.Color != position.OccupyingPiece.Color && s.Column <= limit.Column);
             };
         }
 
@@ -67,7 +76,10 @@ namespace Chess
                             .OrderBy(s => s.Column);
 
                 var limit = potentialScope.LastOrDefault(s => s.OccupyingPiece != null);
-                return potentialScope.Where(s => s.Column >= limit.Column);
+                
+                return potentialScope.Where(s => 
+                    s.OccupyingPiece.Color == position.OccupyingPiece.Color && s.Column > limit.Column ||
+                    s.OccupyingPiece.Color != position.OccupyingPiece.Color && s.Column >= limit.Column);
             };
         }
 
@@ -83,7 +95,10 @@ namespace Chess
                             .OrderBy(s => s.Column);
 
                 var limit = potentialScope.FirstOrDefault(s => s.OccupyingPiece != null);
-                return potentialScope.Where(s => s.Column <= limit.Column);
+                
+                return potentialScope.Where(s => 
+                    limit.OccupyingPiece.Color == position.OccupyingPiece.Color && s.Column < limit.Column ||
+                    limit.OccupyingPiece.Color != position.OccupyingPiece.Color && s.Column <= limit.Column);
             };
         }
 
@@ -99,7 +114,10 @@ namespace Chess
                             .OrderBy(s => s.Column);
 
                 var limit = potentialScope.LastOrDefault(s => s.OccupyingPiece != null);
-                return potentialScope.Where(s => s.Column >= limit.Column);
+                
+                return potentialScope.Where(s => 
+                    limit.OccupyingPiece.Color == position.OccupyingPiece.Color && s.Column > limit.Column ||
+                    limit.OccupyingPiece.Color != position.OccupyingPiece.Color && s.Column >= limit.Column);
             };
         }
             
@@ -115,7 +133,10 @@ namespace Chess
                             .OrderBy(s => s.Column);
 
                 var limit = potentialScope.FirstOrDefault(s => s.OccupyingPiece != null);
-                return potentialScope.Where(s => s.Column <= limit.Column);
+                
+                return potentialScope.Where(s => 
+                    limit.OccupyingPiece.Color == position.OccupyingPiece.Color && s.Column < limit.Column ||
+                    limit.OccupyingPiece.Color != position.OccupyingPiece.Color && s.Column <= limit.Column);
             };
         }
 
@@ -132,7 +153,10 @@ namespace Chess
                             .OrderBy(s => s.Column);
 
                 var limit = potentialScope.LastOrDefault(s => s.OccupyingPiece != null);
-                return potentialScope.Where(s => s.Column >= limit.Column);
+                
+                return potentialScope.Where(s => 
+                    limit.OccupyingPiece.Color == position.OccupyingPiece.Color && s.Column > limit.Column ||
+                    limit.OccupyingPiece.Color != position.OccupyingPiece.Color && s.Column >= limit.Column);
             };
         }
 
@@ -151,9 +175,9 @@ namespace Chess
         {
             return (Board board, Square position) =>
             {
-                var northScope = East(pieceRange)(board, position);
-                var southScope = West(pieceRange)(board, position);
-                return northScope.Concat(southScope);
+                var eastScope = East(pieceRange)(board, position);
+                var westScope = West(pieceRange)(board, position);
+                return eastScope.Concat(westScope);
             };
         }
 
@@ -162,9 +186,9 @@ namespace Chess
         {
             return (Board board, Square position) =>
             {
-                var northScope = East(pieceRange)(board, position);
-                var southScope = West(pieceRange)(board, position);
-                return northScope.Concat(southScope);
+                var northeastScope = NorthEast(pieceRange)(board, position);
+                var southwestScope = SouthWest(pieceRange)(board, position);
+                return northeastScope.Concat(southwestScope);
             };
         }
 
@@ -173,9 +197,9 @@ namespace Chess
         {
             return (Board board, Square position) =>
             {
-                var northScope = East(pieceRange)(board, position);
-                var southScope = West(pieceRange)(board, position);
-                return northScope.Concat(southScope);
+                var northwestScope = NorthWest(pieceRange)(board, position);
+                var southeastScope = SouthEast(pieceRange)(board, position);
+                return northwestScope.Concat(southeastScope);
             };
         }
 
@@ -184,8 +208,14 @@ namespace Chess
         {
             return (Board board, Square position) =>
                 board.Squares.Where(s =>
-                    Math.Abs(s.Column - position.Column) + Math.Abs(s.Row - position.Row) == pieceRange &&
-                    s.OccupyingPiece?.Color != position.OccupyingPiece.Color);
+                {
+                    var horizontalTravel = Math.Abs(s.Column - position.Column);
+                    var verticalTravel = Math.Abs(s.Row - position.Row);
+
+                    return horizontalTravel + verticalTravel == pieceRange &&
+                        horizontalTravel > 0 && verticalTravel > 0 &&
+                        s.OccupyingPiece?.Color != position.OccupyingPiece.Color;
+                });
         }
 
         public static IEnumerable<Square> ResolveScope(Board board, Square position, IEnumerable<Func<Board, Square, IEnumerable<Square>>> scopeFuncs)

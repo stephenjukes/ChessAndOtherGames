@@ -26,7 +26,15 @@ namespace Chess.Players
                     s.OccupyingPiece.Color == this.Color
                     && Moves.ResolveScope(_board, s, s.OccupyingPiece.ScopeFuncs()).Any());
 
-            return new Move();
+            var square = viableSquares.ToArray().First();
+            var scope = Moves.ResolveScope(_board, square, square.OccupyingPiece.ScopeFuncs());
+
+            return new Move
+            {
+                origin = square,
+                Destination = scope.Last(),
+                Piece = square.OccupyingPiece
+            };
         }
     }
 }
