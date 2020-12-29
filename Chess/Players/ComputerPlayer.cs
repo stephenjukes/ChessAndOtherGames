@@ -31,7 +31,7 @@ namespace Chess.Players
 
             return new Move
             {
-                origin = square,
+                Origin = square,
                 Destination = scope.Last(),
                 Piece = square.OccupyingPiece
             };

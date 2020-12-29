@@ -5,6 +5,12 @@ namespace Chess
 {
     class Program
     {
+        // TODO: 
+            // give pieces appearance
+            // display board
+            // dry up Moves static class
+            // handle pawn capture and en passant
+
         static void Main(string[] args)
         {
             var checkmate = false;
@@ -12,8 +18,8 @@ namespace Chess
             var board = new Board();
             var players = new Player[]
             {
-                GetPlayerType(1),
-                GetPlayerType(2)
+                new ComputerPlayer(PieceColor.White),
+                new ComputerPlayer(PieceColor.Black)
             };
 
             while(!checkmate)
@@ -22,11 +28,8 @@ namespace Chess
                 player.View(board);
                 var proposedMove = player.Move();
 
-
-
                 moves++;
             }
-
         }
 
         static Player GetPlayerType(int player)

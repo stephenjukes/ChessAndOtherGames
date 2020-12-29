@@ -6,7 +6,7 @@ namespace Chess
 {
     class Move
     {
-        public Square origin { get; set; }
+        public Square Origin { get; set; }
         public Square Destination { get; set; }
         public Piece Piece { get; set; }
     }

@@ -7,6 +7,58 @@ namespace Chess
 {
     static class Moves
     {
+        private static Dictionary<PieceColor, Direction> colorOrientations = new Dictionary<PieceColor, Direction>()
+        {
+            { PieceColor.White, Direction.North },
+            { PieceColor.Black, Direction.South }
+        };
+
+        private static CompassPoint[] compassPoints = new CompassPoint[]
+        {
+            new CompassPoint(Direction.North, 0, North),
+            new CompassPoint(Direction.NorthEast, 45, NorthEast),
+            new CompassPoint(Direction.East, 90, East),
+            new CompassPoint(Direction.SouthEast, 135, SouthEast),
+            new CompassPoint(Direction.South, 180, South),
+            new CompassPoint(Direction.SouthWest, 225, SouthWest),
+            new CompassPoint(Direction.West, 270, West),
+            new CompassPoint(Direction.NorthWest, 315, NorthWest),
+        };
+         
+        // Can a delegate be used here?
+        public static Func<Board, Square, IEnumerable<Square>> Forwards(PieceColor pieceColor, int pieceRange) 
+            => ResolveScopeFunc(pieceColor, 0)(pieceRange);
+
+        public static Func<Board, Square, IEnumerable<Square>> ForwardsRight(PieceColor pieceColor, int pieceRange) 
+            => ResolveScopeFunc(pieceColor, 45)(pieceRange);
+
+        public static Func<Board, Square, IEnumerable<Square>> Right(PieceColor pieceColor, int pieceRange) 
+            => ResolveScopeFunc(pieceColor, 90)(pieceRange);
+
+        public static Func<Board, Square, IEnumerable<Square>> BackwardsRight(PieceColor pieceColor, int pieceRange) 
+            => ResolveScopeFunc(pieceColor, 135)(pieceRange);
+
+        public static Func<Board, Square, IEnumerable<Square>> Backwards(PieceColor pieceColor, int pieceRange) 
+            => ResolveScopeFunc(pieceColor, 180)(pieceRange);
+
+        public static Func<Board, Square, IEnumerable<Square>> BackwardsLeft(PieceColor pieceColor, int pieceRange) 
+            => ResolveScopeFunc(pieceColor, 225)(pieceRange);
+
+        public static Func<Board, Square, IEnumerable<Square>> Left(PieceColor pieceColor, int pieceRange) 
+            => ResolveScopeFunc(pieceColor, 270)(pieceRange);
+
+        public static Func<Board, Square, IEnumerable<Square>> ForwardsLeft(PieceColor pieceColor, int pieceRange) 
+            => ResolveScopeFunc(pieceColor, 315)(pieceRange);
+
+        private static Func<int, Func<Board, Square, IEnumerable<Square>>> ResolveScopeFunc(PieceColor pieceColor, int degreeRotation)
+        {
+            var colorOrientation = colorOrientations[pieceColor];
+            var compassOrientation = compassPoints.FirstOrDefault(p => p.Direction == colorOrientation);
+            var moveOrientation = compassPoints.FirstOrDefault(p => p.Bearing == ((compassOrientation.Bearing + degreeRotation) % 360));
+
+            return moveOrientation.ScopeFunc;
+        }
+
         public static Func<Board, Square, IEnumerable<Square>> North (int pieceRange)
         {
             return (Board board, Square position) =>
@@ -18,8 +70,9 @@ namespace Chess
                         Math.Abs(s.Row - position.Row) <= pieceRange)
                     .OrderBy(s => s.Row);
 
-                var limit = potentialScope.FirstOrDefault(s => s.OccupyingPiece != null);
-                
+                var limit = potentialScope.FirstOrDefault(s => s.OccupyingPiece != null) ?? potentialScope.LastOrDefault();
+                if (limit == null || limit.OccupyingPiece == null) return potentialScope;
+
                 return potentialScope.Where(s => 
                     limit.OccupyingPiece.Color == position.OccupyingPiece.Color && s.Row < limit.Row ||
                     limit.OccupyingPiece.Color != position.OccupyingPiece.Color && s.Row <= limit.Row);
@@ -37,11 +90,12 @@ namespace Chess
                         Math.Abs(s.Row - position.Row) <= pieceRange)
                     .OrderBy(s => s.Row);
 
-                var limit = potentialScope.LastOrDefault(s => s.OccupyingPiece != null);
-                
+                var limit = potentialScope.LastOrDefault(s => s.OccupyingPiece != null) ?? potentialScope.LastOrDefault();
+                if (limit == null || limit.OccupyingPiece == null) return potentialScope;
+
                 return potentialScope.Where(s => 
-                    s.OccupyingPiece.Color == position.OccupyingPiece.Color && s.Row > limit.Row ||
-                    s.OccupyingPiece.Color != position.OccupyingPiece.Color && s.Row >= limit.Row);
+                    limit.OccupyingPiece.Color == position.OccupyingPiece.Color && s.Row > limit.Row ||
+                    limit.OccupyingPiece.Color != position.OccupyingPiece.Color && s.Row >= limit.Row);
             };
         }
 
@@ -56,11 +110,12 @@ namespace Chess
                                 Math.Abs(s.Column - position.Column) <= pieceRange)
                             .OrderBy(s => s.Column);
 
-                var limit = potentialScope.FirstOrDefault(s => s.OccupyingPiece != null);
-                
+                var limit = potentialScope.FirstOrDefault(s => s.OccupyingPiece != null) ?? potentialScope.LastOrDefault();
+                if (limit == null || limit.OccupyingPiece == null) return potentialScope;
+
                 return potentialScope.Where(s => 
-                    s.OccupyingPiece.Color == position.OccupyingPiece.Color && s.Column < limit.Column ||
-                    s.OccupyingPiece.Color != position.OccupyingPiece.Color && s.Column <= limit.Column);
+                    limit.OccupyingPiece.Color == position.OccupyingPiece.Color && s.Column < limit.Column ||
+                    limit.OccupyingPiece.Color != position.OccupyingPiece.Color && s.Column <= limit.Column);
             };
         }
 
@@ -75,11 +130,12 @@ namespace Chess
                                 Math.Abs(s.Column - position.Column) <= pieceRange)
                             .OrderBy(s => s.Column);
 
-                var limit = potentialScope.LastOrDefault(s => s.OccupyingPiece != null);
+                var limit = potentialScope.LastOrDefault(s => s.OccupyingPiece != null) ?? potentialScope.LastOrDefault();
+                if (limit == null || limit.OccupyingPiece == null) return potentialScope;
                 
                 return potentialScope.Where(s => 
-                    s.OccupyingPiece.Color == position.OccupyingPiece.Color && s.Column > limit.Column ||
-                    s.OccupyingPiece.Color != position.OccupyingPiece.Color && s.Column >= limit.Column);
+                    limit.OccupyingPiece.Color == position.OccupyingPiece.Color && s.Column > limit.Column ||
+                    limit.OccupyingPiece.Color != position.OccupyingPiece.Color && s.Column >= limit.Column);
             };
         }
 
@@ -94,8 +150,9 @@ namespace Chess
                                 Math.Abs(s.Column - position.Column) <= pieceRange)
                             .OrderBy(s => s.Column);
 
-                var limit = potentialScope.FirstOrDefault(s => s.OccupyingPiece != null);
-                
+                var limit = potentialScope.FirstOrDefault(s => s.OccupyingPiece != null) ?? potentialScope.LastOrDefault();
+                if (limit == null || limit.OccupyingPiece == null) return potentialScope;
+
                 return potentialScope.Where(s => 
                     limit.OccupyingPiece.Color == position.OccupyingPiece.Color && s.Column < limit.Column ||
                     limit.OccupyingPiece.Color != position.OccupyingPiece.Color && s.Column <= limit.Column);
@@ -113,8 +170,9 @@ namespace Chess
                                 Math.Abs(s.Column - position.Column) <= pieceRange)
                             .OrderBy(s => s.Column);
 
-                var limit = potentialScope.LastOrDefault(s => s.OccupyingPiece != null);
-                
+                var limit = potentialScope.LastOrDefault(s => s.OccupyingPiece != null) ?? potentialScope.LastOrDefault();
+                if (limit == null || limit.OccupyingPiece == null) return potentialScope;
+
                 return potentialScope.Where(s => 
                     limit.OccupyingPiece.Color == position.OccupyingPiece.Color && s.Column > limit.Column ||
                     limit.OccupyingPiece.Color != position.OccupyingPiece.Color && s.Column >= limit.Column);
@@ -132,14 +190,14 @@ namespace Chess
                                 Math.Abs(s.Column - position.Column) <= pieceRange)
                             .OrderBy(s => s.Column);
 
-                var limit = potentialScope.FirstOrDefault(s => s.OccupyingPiece != null);
-                
+                var limit = potentialScope.FirstOrDefault(s => s.OccupyingPiece != null) ?? potentialScope.LastOrDefault();
+                if (limit == null || limit.OccupyingPiece == null) return potentialScope;
+
                 return potentialScope.Where(s => 
                     limit.OccupyingPiece.Color == position.OccupyingPiece.Color && s.Column < limit.Column ||
                     limit.OccupyingPiece.Color != position.OccupyingPiece.Color && s.Column <= limit.Column);
             };
         }
-
 
         public static Func<Board, Square, IEnumerable<Square>> NorthWest(int pieceRange)
         {
@@ -152,8 +210,9 @@ namespace Chess
                                 Math.Abs(s.Column - position.Column) <= pieceRange)
                             .OrderBy(s => s.Column);
 
-                var limit = potentialScope.LastOrDefault(s => s.OccupyingPiece != null);
-                
+                var limit = potentialScope.LastOrDefault(s => s.OccupyingPiece != null) ?? potentialScope.LastOrDefault();
+                if (limit == null || limit.OccupyingPiece == null) return potentialScope;
+
                 return potentialScope.Where(s => 
                     limit.OccupyingPiece.Color == position.OccupyingPiece.Color && s.Column > limit.Column ||
                     limit.OccupyingPiece.Color != position.OccupyingPiece.Color && s.Column >= limit.Column);
@@ -170,7 +229,6 @@ namespace Chess
             };
         }
 
-
         public static Func<Board, Square, IEnumerable<Square>> Horizontal (int pieceRange)
         {
             return (Board board, Square position) =>
@@ -180,7 +238,6 @@ namespace Chess
                 return eastScope.Concat(westScope);
             };
         }
-
 
         public static Func<Board, Square, IEnumerable<Square>> ForwardSlashDiagonal(int pieceRange)
         {
@@ -192,7 +249,6 @@ namespace Chess
             };
         }
 
-
         public static Func<Board, Square, IEnumerable<Square>> BackSlashDiagonal (int pieceRange)
         {
             return (Board board, Square position) =>
@@ -202,7 +258,6 @@ namespace Chess
                 return northwestScope.Concat(southeastScope);
             };
         }
-
 
         public static Func<Board, Square, IEnumerable<Square>> Knight(int pieceRange)
         {
