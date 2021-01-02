@@ -27,9 +27,12 @@ namespace Chess.Games
                 player.View(board);
                 var proposedMove = player.Move();
 
+                // Handle properly ------------------------------------------
+                proposedMove.Destination.OccupyingPiece = proposedMove.Piece;
+                proposedMove.Origin.OccupyingPiece = null;
+                //-----------------------------------------------------------
 
-                Console.OutputEncoding = System.Text.Encoding.Unicode;
-                this.IO.Render(this.IO.PieceTypes[typeof(Pawn)]);
+                this.IO.Render(board);
                 moves++;
             }
         }
