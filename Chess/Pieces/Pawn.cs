@@ -14,6 +14,6 @@ namespace Chess
 
         // handle diagonal capture and en passant
         public override IEnumerable<Func<Board, Square, IEnumerable<Square>>> ScopeFuncs()
-            => new Func<Board, Square, IEnumerable<Square>>[] { Moves.Forwards(this.Color, 1) };
+            => new Func<Board, Square, IEnumerable<Square>>[] { Moves.Pawn(1) };
     }
 }
