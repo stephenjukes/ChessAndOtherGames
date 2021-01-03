@@ -51,7 +51,6 @@ namespace Chess
             {
                 var piece = pieceCreator(color, square);
                 square.OccupyingPiece = piece;
-                piece.Position = square;
             }
         }
     }

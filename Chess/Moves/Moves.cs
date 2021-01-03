@@ -157,12 +157,31 @@ namespace Chess
             return (Board board, Square position) =>
             {
                 var piece = position.OccupyingPiece;
-                var advance = Forwards(piece.Color, piece.Position == piece.HomeSquare ? 2 : pieceRange)(board, position).Where(s => s.OccupyingPiece == null);
+                var advance = Forwards(piece.Color, !piece.MoveHistory.Any() ? 2 : pieceRange)(board, position).Where(s => s.OccupyingPiece == null);
                 var leftCapture = ForwardsLeft(piece.Color, pieceRange)(board, position).Where(s => s.OccupyingPiece != null);
                 var rightCapture = ForwardsRight(piece.Color, pieceRange)(board, position).Where(s => s.OccupyingPiece != null);
 
-                return advance.Concat(leftCapture).Concat(rightCapture);
+                return advance
+                    .Concat(leftCapture)
+                    .Concat(rightCapture)
+                    .Concat(EnPassant(board, position));
             };
+        }
+
+        private static IEnumerable<Square> EnPassant(Board board, Square position)
+        {
+            var piece = position.OccupyingPiece;
+
+            return board.Squares
+                .Where(s =>
+                    piece.GetType() == typeof(Pawn) &&
+                    s.Row == position.Row &&
+                    Math.Abs(s.Column - position.Column) == 1 &&
+                    s.OccupyingPiece.GetType() == typeof(Pawn) &&
+                    s.OccupyingPiece.Color != piece.Color)
+                .SelectMany(s =>
+                    Backwards(s.OccupyingPiece.Color, 1)(board, s)
+                );
         }
 
         public static IEnumerable<Square> ResolveScope(Board board, Square position, IEnumerable<Func<Board, Square, IEnumerable<Square>>> scopeFuncs)

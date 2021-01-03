@@ -11,6 +11,7 @@ namespace Chess.InputOutput
         public abstract string Read();
         public abstract void Render(string data);
         public abstract void Render(Board board);
+        public abstract void Render(Move move);
 
         // TODO: Check that all pieces have been populated with a rendering string
         // Change to protected when handled correctly in derived class

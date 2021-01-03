@@ -8,9 +8,10 @@ namespace Chess
     class Program
     {
         // TODO: 
-            // give pieces appearance
-            // display board
-            // handle en passant
+            // move validity
+            // handle captures (especially for en passant)
+            // figure out the best way to validate that en passant is undertaken immediately after a pawn is advanced by 2 squares
+            // handle en passant, castling, pawn promotion, check, checkmate
 
         static void Main(string[] args)
         {

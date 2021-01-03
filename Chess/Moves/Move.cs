@@ -8,6 +8,7 @@ namespace Chess
     {
         public Square Origin { get; set; }
         public Square Destination { get; set; }
-        public Piece Piece { get; set; }
+        public int Number { get; set; }
+        public string Notation { get; set; }
     }
 }

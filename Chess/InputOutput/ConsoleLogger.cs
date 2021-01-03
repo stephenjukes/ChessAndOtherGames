@@ -80,6 +80,17 @@ namespace Chess.InputOutput
             Console.WriteLine(indentation + Spaces(1) + string.Join(spacer, "ABCDEFGH".ToCharArray()));
         }
 
+        public override void Render(Move move)
+        {
+            var origin = move.Origin;
+            var destination = move.Destination;
+
+            Console.WriteLine(
+                $"{destination.OccupyingPiece.GetType().Name}: " +
+                $"{origin.Column}{origin.Row} - " +
+                $"{destination.Column}{destination.Row}");
+        }
+
         private string Spaces(int n) => new string(' ', n);
     }
 }

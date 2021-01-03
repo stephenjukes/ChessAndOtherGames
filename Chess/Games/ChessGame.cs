@@ -23,16 +23,24 @@ namespace Chess.Games
         {
             while (!checkmate)
             {
+                
+
                 var player = players[moves % 2];
                 player.View(board);
-                var proposedMove = player.Move();
 
-                // Handle properly ------------------------------------------
-                proposedMove.Destination.OccupyingPiece = proposedMove.Piece;
-                proposedMove.Origin.OccupyingPiece = null;
-                //-----------------------------------------------------------
+                var move = player.Move();
+                move.Number = moves;
+
+                // TODO: Check move for validity
+                var piece = move.Origin.OccupyingPiece;
+                piece.MoveHistory.Add(move.Destination);
+                move.Destination.OccupyingPiece = piece;
+                move.Origin.OccupyingPiece = null;
+
 
                 this.IO.Render(board);
+                this.IO.Render(move);
+
                 moves++;
             }
         }

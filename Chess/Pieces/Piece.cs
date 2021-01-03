@@ -9,14 +9,12 @@ namespace Chess
         public Piece(PieceColor color, Square homeSquare)
         {
             Color = color;
-            HomeSquare = homeSquare;
-            Position = homeSquare;
         }
 
         public abstract int Value { get; }
         public abstract IEnumerable<Func<Board, Square, IEnumerable<Square>>> ScopeFuncs();
         public PieceColor Color { get; set; }
-        public Square HomeSquare { get; set; }
-        public Square Position { get; set; }
+        //public Square HomeSquare { get; set; }  // Consider removing now we have a MoveHistory property
+        public List<Square> MoveHistory { get; set; } = new List<Square>();
     }
 }

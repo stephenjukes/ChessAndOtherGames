@@ -25,13 +25,14 @@ namespace Chess.Players
                     s.OccupyingPiece != null &&
                     s.OccupyingPiece.Color == this.Color
                     && Moves.ResolveScope(_board, s, s.OccupyingPiece.ScopeFuncs()).Any())
-                .Select(s => new { Piece = s.OccupyingPiece, Scope = Moves.ResolveScope(_board, s, s.OccupyingPiece.ScopeFuncs()) });
+                .Select(s => new { Square = s, Scope = Moves.ResolveScope(_board, s, s.OccupyingPiece.ScopeFuncs()) });
+
+            var firstViableSquare = viableSquares.First();
 
             return new Move
             {
-                Origin = viableSquares.First().Piece.HomeSquare,
-                Destination = viableSquares.First().Scope.First(),
-                Piece = viableSquares.First().Piece
+                Origin = firstViableSquare.Square,
+                Destination = firstViableSquare.Scope.First()
             };
         }
     }
